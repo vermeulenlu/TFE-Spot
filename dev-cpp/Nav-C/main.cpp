@@ -27,10 +27,82 @@
 #include "include/d_star_lite.hpp"
 #include "include/jump_point_search.hpp"
 #include "include/lpa_star.hpp"
+#include <opencv2/opencv.hpp>
+#include <opencv2/core/core.hpp> 
+#include <opencv2/highgui.hpp>
+#include "opencv2/imgcodecs.hpp"
+#include <opencv2/core.hpp> 
+// Create a variable to save the position value in track 
+int blurAmount=15; 
+struct MouseParams
+{
+    cv::Mat img;
+    cv::Point begin; 
+    cv::Point pt;
 
+};
 
+//Mouse callback 
+static void onMouse(int event, int x, int y, int, void* userInput) 
+{ 
+  if(event !=cv::EVENT_LBUTTONDOWN) 
+          return; 
+
+  // Get the pointer input image 
+  MouseParams* mp = (MouseParams*)userInput;
+  mp->pt = cv::Point(x,y);
+
+  cv::Mat *img= &(mp->img); 
+  // Draw circle
+  cv::Mat temp = (*img).clone();
+  circle(temp, cv::Point(x, y), 10, cv::Scalar(0, 255, 0), 3);
+  circle(temp, (*mp).begin, 10, cv::Scalar(0, 0, 255), 3);
+
+  // Call on change to get blurred image
+  cv::imshow("Lena", temp); 
+}  
 using namespace std::chrono_literals;
 
+void create_img(int width, int height, const std::vector<std::vector<int>>&   map,  cv::Mat &mat_img ){
+cv::Mat mat_img_1(width, height, CV_8UC3, cv::Scalar(0, 0, 0));
+
+for(int i=0;i<width;i++){
+    for(int j=0;j<height;j++){
+      cv::Vec3b & color = mat_img_1.at<cv::Vec3b>(i,j);
+      if (map[i][j]==3)
+        color = cv::Vec3b(255,255,0);      
+      else if (map[i][j]==1)
+          color = cv::Vec3b(255,255,255);
+    }
+}
+	cv::resize(mat_img_1, mat_img, cv::Size(width*4, height*4), cv::INTER_LINEAR);
+    
+}
+void visualization(int width, int height, std::vector<std::vector<int>>&   map ){
+  cv::Mat mat_img;
+create_img(width, height, map, mat_img);
+cv::imshow("hello world", mat_img);
+    int k = cv::waitKey(0); // Wait for a keystroke in the window
+}
+void choseInput(int width, int height, std::vector<std::vector<int>>&   map, const cv::Point &point_input, cv::Point &point_dest)
+{
+
+  cv::   namedWindow("Lena"); 
+  cv::Mat mat_img;
+  create_img(width, height, map, mat_img);
+  std::cout << mat_img.at<cv::Vec3b>(0,0);
+  MouseParams mp{mat_img,cv::Point(point_input.x*4,point_input.x*4), cv::Point(0,0)};
+    circle(mat_img, (mp).begin, 10, cv::Scalar(0, 0, 255), 3);
+
+  cv::imshow("Lena", mat_img); 
+  cv::setMouseCallback("Lena", onMouse, &mp); 
+  cv::waitKey(0); 
+  cv:: destroyWindow("Lena"); 
+  std::cout <<(mp.pt).x;
+  point_dest.x = (mp.pt).y/4;
+  point_dest.y = (mp.pt).x/4;
+
+}
 pcl::visualization::PCLVisualizer::Ptr simpleVis (pcl::PointCloud<pcl::PointXYZ>::ConstPtr cloud)
 {
   // --------------------------------------------
@@ -254,7 +326,7 @@ void Print_Map(std::vector<std::vector<int>>& map, int dim, std::string folder_n
 int main (int argc, char** argv)
 {
   pcl::PointCloud<pcl::PointXYZ>::Ptr basic_cloud_ptr (new pcl::PointCloud<pcl::PointXYZ>);
-  if (pcl::io::loadPCDFile<pcl::PointXYZ> ("../save/cloud_100.pcd", *basic_cloud_ptr) == -1) //* load the file
+  if (pcl::io::loadPCDFile<pcl::PointXYZ> ("./save/cloud_100.pcd", *basic_cloud_ptr) == -1) //* load the file
   {
      PCL_ERROR ("Couldn't read file test_pcd.pcd \n");
      return (-1);
@@ -274,7 +346,8 @@ int main (int argc, char** argv)
       filtred_cloud_ptr->points.push_back(adding_point);
     }
   }
-
+  //TODO : Voir le temps que ça te prend pour créer la map et pour créer ton path.
+  //TODO : créer une itnerface
   // Add informations about the pointcloud
   filtred_cloud_ptr->width = filtred_cloud_ptr->size ();
   filtred_cloud_ptr->height = 1;
@@ -328,19 +401,24 @@ int main (int argc, char** argv)
           }
         }
         else{
-          if(map[i][j] != 0){
+          if(map[i][j] == 0){
             map[i][j] = 0;
           }
         }
       }
     }
   }
+  cv::Point final = cv::Point(0,0);
+  cv::Point begin = cv::Point(width_map/2,height_map/2);
 
+  choseInput(width_map, height_map,   map,begin, final);
   // Creating goal and start position
   int n = dimension;
+  // Normalement l'input on le prend via l'odométrie. 
 
-  Node start(0, 0, 0, 0, 0, 0);
-  Node goal(dimension/2, dimension/2, 0, 0, 0, 0);
+  Node start(begin.x, begin.y, 0, 0, 0, 0);
+  Node goal(final.x, final.y, 0, 0, 0, 0);
+  //Node goal(dimension/2, dimension/2, 0, 0, 0, 0);
 
   start.id_ = start.x_ * n + start.y_;
   start.pid_ = start.x_ * n + start.y_;
@@ -362,6 +440,7 @@ int main (int argc, char** argv)
     const auto [path_found, path_vector] = a_star.Plan(start, goal);
     PrintPath(path_vector, start, goal, map);
     Print_Map(map, dimension, "../a_star.txt");
+    visualization(dimension, dimension,map);
   }
   time_req = clock() - time_req;
 	cout << "A_star " << (float)time_req/CLOCKS_PER_SEC << " seconds" << endl;
@@ -376,6 +455,8 @@ int main (int argc, char** argv)
     const auto [path_found, path_vector] = jump_point_search.Plan(start, goal);
     PrintPath(path_vector, start, goal, map);
     Print_Map(map, dimension, "../jump_point_search.txt");
+    visualization(dimension, dimension,map);
+
   }
   time_req = clock() - time_req;
 	cout << "JPS " << (float)time_req/CLOCKS_PER_SEC << " seconds" << endl;
@@ -390,6 +471,8 @@ int main (int argc, char** argv)
     const auto [path_found, path_vector] = lpa_star.Plan(start, goal);
     PrintPath(path_vector, start, goal, map);
     Print_Map(map, dimension, "../lpa_star.txt");
+    visualization(dimension, dimension,map);
+
   }
   time_req = clock() - time_req;
 	cout << "LPA " << (float)time_req/CLOCKS_PER_SEC << " seconds" << endl;
@@ -404,6 +487,8 @@ int main (int argc, char** argv)
     const auto [path_found, path_vector] = d_star_lite.Plan(start, goal);
     PrintPath(path_vector, start, goal, map);
     Print_Map(map, dimension, "../d_star_lite.txt");
+        visualization(dimension, dimension,map);
+
   }
   time_req = clock() - time_req;
 	cout << "D_star " << (float)time_req/CLOCKS_PER_SEC << " seconds" << endl;
