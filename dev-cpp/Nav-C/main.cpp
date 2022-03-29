@@ -79,10 +79,12 @@ for(int i=0;i<width;i++){
     
 }
 void visualization(int width, int height, std::vector<std::vector<int>>&   map ){
+
   cv::Mat mat_img;
 create_img(width, height, map, mat_img);
-cv::imshow("hello world", mat_img);
-    int k = cv::waitKey(0); // Wait for a keystroke in the window
+cv::imshow("path", mat_img);
+    cv::waitKey(0); // Wait for a keystroke in the window
+
 }
 void choseInput(int width, int height, std::vector<std::vector<int>>&   map, const cv::Point &point_input, cv::Point &point_dest)
 {
@@ -440,7 +442,6 @@ int main (int argc, char** argv)
     const auto [path_found, path_vector] = a_star.Plan(start, goal);
     PrintPath(path_vector, start, goal, map);
     Print_Map(map, dimension, "../a_star.txt");
-    visualization(dimension, dimension,map);
   }
   time_req = clock() - time_req;
 	cout << "A_star " << (float)time_req/CLOCKS_PER_SEC << " seconds" << endl;
@@ -454,8 +455,8 @@ int main (int argc, char** argv)
     map = main_grid;
     const auto [path_found, path_vector] = jump_point_search.Plan(start, goal);
     PrintPath(path_vector, start, goal, map);
-    Print_Map(map, dimension, "../jump_point_search.txt");
-    visualization(dimension, dimension,map);
+    std::cout <<"hello " <<std::endl;
+   Print_Map(map, dimension, "../jump_point_search.txt");
 
   }
   time_req = clock() - time_req;
@@ -487,7 +488,6 @@ int main (int argc, char** argv)
     const auto [path_found, path_vector] = d_star_lite.Plan(start, goal);
     PrintPath(path_vector, start, goal, map);
     Print_Map(map, dimension, "../d_star_lite.txt");
-        visualization(dimension, dimension,map);
 
   }
   time_req = clock() - time_req;
