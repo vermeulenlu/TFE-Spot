@@ -70,9 +70,22 @@ CMakeFiles/main.dir/main.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/main.dir/main.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /media/sf_dev-cpp/Nav-C/main.cpp -o CMakeFiles/main.dir/main.cpp.s
 
+CMakeFiles/main.dir/JPS.cpp.o: CMakeFiles/main.dir/flags.make
+CMakeFiles/main.dir/JPS.cpp.o: ../JPS.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/sf_dev-cpp/Nav-C/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/main.dir/JPS.cpp.o"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/main.dir/JPS.cpp.o -c /media/sf_dev-cpp/Nav-C/JPS.cpp
+
+CMakeFiles/main.dir/JPS.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/main.dir/JPS.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /media/sf_dev-cpp/Nav-C/JPS.cpp > CMakeFiles/main.dir/JPS.cpp.i
+
+CMakeFiles/main.dir/JPS.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/main.dir/JPS.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /media/sf_dev-cpp/Nav-C/JPS.cpp -o CMakeFiles/main.dir/JPS.cpp.s
+
 CMakeFiles/main.dir/src/dijkstra.cpp.o: CMakeFiles/main.dir/flags.make
 CMakeFiles/main.dir/src/dijkstra.cpp.o: ../src/dijkstra.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/sf_dev-cpp/Nav-C/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/main.dir/src/dijkstra.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/sf_dev-cpp/Nav-C/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/main.dir/src/dijkstra.cpp.o"
 	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/main.dir/src/dijkstra.cpp.o -c /media/sf_dev-cpp/Nav-C/src/dijkstra.cpp
 
 CMakeFiles/main.dir/src/dijkstra.cpp.i: cmake_force
@@ -85,7 +98,7 @@ CMakeFiles/main.dir/src/dijkstra.cpp.s: cmake_force
 
 CMakeFiles/main.dir/src/utils.cpp.o: CMakeFiles/main.dir/flags.make
 CMakeFiles/main.dir/src/utils.cpp.o: ../src/utils.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/sf_dev-cpp/Nav-C/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/main.dir/src/utils.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/sf_dev-cpp/Nav-C/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/main.dir/src/utils.cpp.o"
 	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/main.dir/src/utils.cpp.o -c /media/sf_dev-cpp/Nav-C/src/utils.cpp
 
 CMakeFiles/main.dir/src/utils.cpp.i: cmake_force
@@ -98,7 +111,7 @@ CMakeFiles/main.dir/src/utils.cpp.s: cmake_force
 
 CMakeFiles/main.dir/src/a_star.cpp.o: CMakeFiles/main.dir/flags.make
 CMakeFiles/main.dir/src/a_star.cpp.o: ../src/a_star.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/sf_dev-cpp/Nav-C/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/main.dir/src/a_star.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/sf_dev-cpp/Nav-C/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/main.dir/src/a_star.cpp.o"
 	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/main.dir/src/a_star.cpp.o -c /media/sf_dev-cpp/Nav-C/src/a_star.cpp
 
 CMakeFiles/main.dir/src/a_star.cpp.i: cmake_force
@@ -111,7 +124,7 @@ CMakeFiles/main.dir/src/a_star.cpp.s: cmake_force
 
 CMakeFiles/main.dir/src/d_star_lite.cpp.o: CMakeFiles/main.dir/flags.make
 CMakeFiles/main.dir/src/d_star_lite.cpp.o: ../src/d_star_lite.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/sf_dev-cpp/Nav-C/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/main.dir/src/d_star_lite.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/sf_dev-cpp/Nav-C/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/main.dir/src/d_star_lite.cpp.o"
 	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/main.dir/src/d_star_lite.cpp.o -c /media/sf_dev-cpp/Nav-C/src/d_star_lite.cpp
 
 CMakeFiles/main.dir/src/d_star_lite.cpp.i: cmake_force
@@ -124,7 +137,7 @@ CMakeFiles/main.dir/src/d_star_lite.cpp.s: cmake_force
 
 CMakeFiles/main.dir/src/jump_point_search.cpp.o: CMakeFiles/main.dir/flags.make
 CMakeFiles/main.dir/src/jump_point_search.cpp.o: ../src/jump_point_search.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/sf_dev-cpp/Nav-C/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/main.dir/src/jump_point_search.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/sf_dev-cpp/Nav-C/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/main.dir/src/jump_point_search.cpp.o"
 	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/main.dir/src/jump_point_search.cpp.o -c /media/sf_dev-cpp/Nav-C/src/jump_point_search.cpp
 
 CMakeFiles/main.dir/src/jump_point_search.cpp.i: cmake_force
@@ -137,7 +150,7 @@ CMakeFiles/main.dir/src/jump_point_search.cpp.s: cmake_force
 
 CMakeFiles/main.dir/src/lpa_star.cpp.o: CMakeFiles/main.dir/flags.make
 CMakeFiles/main.dir/src/lpa_star.cpp.o: ../src/lpa_star.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/sf_dev-cpp/Nav-C/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/main.dir/src/lpa_star.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/sf_dev-cpp/Nav-C/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/main.dir/src/lpa_star.cpp.o"
 	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/main.dir/src/lpa_star.cpp.o -c /media/sf_dev-cpp/Nav-C/src/lpa_star.cpp
 
 CMakeFiles/main.dir/src/lpa_star.cpp.i: cmake_force
@@ -151,6 +164,7 @@ CMakeFiles/main.dir/src/lpa_star.cpp.s: cmake_force
 # Object files for target main
 main_OBJECTS = \
 "CMakeFiles/main.dir/main.cpp.o" \
+"CMakeFiles/main.dir/JPS.cpp.o" \
 "CMakeFiles/main.dir/src/dijkstra.cpp.o" \
 "CMakeFiles/main.dir/src/utils.cpp.o" \
 "CMakeFiles/main.dir/src/a_star.cpp.o" \
@@ -162,6 +176,7 @@ main_OBJECTS = \
 main_EXTERNAL_OBJECTS =
 
 main: CMakeFiles/main.dir/main.cpp.o
+main: CMakeFiles/main.dir/JPS.cpp.o
 main: CMakeFiles/main.dir/src/dijkstra.cpp.o
 main: CMakeFiles/main.dir/src/utils.cpp.o
 main: CMakeFiles/main.dir/src/a_star.cpp.o
@@ -259,7 +274,7 @@ main: /usr/lib/x86_64-linux-gnu/libX11.so
 main: /usr/lib/x86_64-linux-gnu/libXext.so
 main: /usr/lib/x86_64-linux-gnu/libXt.so
 main: CMakeFiles/main.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/media/sf_dev-cpp/Nav-C/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Linking CXX executable main"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/media/sf_dev-cpp/Nav-C/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Linking CXX executable main"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/main.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

@@ -1,4 +1,5 @@
 file(REMOVE_RECURSE
+  "CMakeFiles/main.dir/JPS.cpp.o"
   "CMakeFiles/main.dir/main.cpp.o"
   "CMakeFiles/main.dir/src/a_star.cpp.o"
   "CMakeFiles/main.dir/src/d_star_lite.cpp.o"
