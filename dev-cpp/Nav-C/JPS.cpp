@@ -6,6 +6,7 @@
 #include "JPS.hpp"
 #include <unistd.h>
 #include <cstdlib>
+#define CHECK_BIT(var,pos) ((var) & (1<<(pos)))
 
 class Compare
 {
@@ -26,31 +27,26 @@ public:
 void Noeud::print_Noeud()
 {
     cout << "x : " << this->x << " y : " << this->y << " cost : " << this->cost << " h : " << this->h << " id : " << this->id << " pid : " << this->pid << endl;
-    //cout << "y : " << this->y << endl;
-    // cout << "cost : " << this->cost << endl;
-    // cout << "id : " << this->id << endl;
-    // cout << "pid : " << this->pid << endl;
-    // cout << "h : " << this->h << endl;
 }
-void Noeud::compute_heuristic(Noeud &goal)
+void Noeud::compute_heuristic(Noeud& goal)
 {
     this->h = (abs(this->x - goal.x) + abs(this->y - goal.y)); // Manhatann heuristic
 }
 
-std::vector<Noeud> actions(Noeud &start)
+std::vector<Noeud> JPS::actions(Noeud& current)
 {
     return {
-        Noeud(start.x, start.y-1, start.cost + 1, 0, start.id),
-        Noeud(start.x+1, start.y-1, start.cost + sqrt(2), 0, start.id),
-        Noeud(start.x+1, start.y, start.cost + 1, 0, start.id),
-        Noeud(start.x+1, start.y+1, start.cost + sqrt(2), 0, start.id),
-        Noeud(start.x, start.y+1, start.cost + 1, 0, start.id),
-        Noeud(start.x-1, start.y+1, start.cost + sqrt(2), 0, start.id),
-        Noeud(start.x-1, start.y, start.cost + 1, 0, start.id),
-        Noeud(start.x-1, start.y-1, start.cost + sqrt(2), 0, start.id)};
+        Noeud(current.x, current.y-1, current.cost + 1, 0, current.id),
+        Noeud(current.x+1, current.y-1, current.cost + sqrt(2), 0, current.id),
+        Noeud(current.x+1, current.y, current.cost + 1, 0, current.id),
+        Noeud(current.x+1, current.y+1, current.cost + sqrt(2), 0, current.id),
+        Noeud(current.x, current.y+1, current.cost + 1, 0, current.id),
+        Noeud(current.x-1, current.y+1, current.cost + sqrt(2), 0, current.id),
+        Noeud(current.x-1, current.y, current.cost + 1, 0, current.id),
+        Noeud(current.x-1, current.y-1, current.cost + sqrt(2), 0, current.id)};
 }
 
-int direction(Noeud &parent, Noeud &child)
+int JPS::direction(Noeud &parent, Noeud &child)
 {
     int a = parent.x - child.x; // -1: droite 1: gauche
     int b = parent.y - child.y; // -1: bas 1:haut
@@ -92,7 +88,7 @@ int direction(Noeud &parent, Noeud &child)
     } // problem
 }
 
-Noeud step(Noeud &parent, int direction)
+Noeud JPS::step(Noeud &parent, int direction)
 {
     if (direction == 0)
     {
@@ -126,17 +122,12 @@ Noeud step(Noeud &parent, int direction)
     {
         return Noeud(parent.x - 1, parent.y - 1, parent.cost + sqrt(2), 0, parent.id);
     }
+    return Noeud(-1,-1,-1,-1,-1);
 }
 
-int hasForcedNeighbours(Noeud &current, int direction, std::vector<std::vector<int>> grid){
-    int first_x;
-    int second_one_x;
-    int second_two_x;
+int JPS::hasForcedNeighbours(Noeud &current, int direction){
     int third_one_x;
     int third_two_x;
-    int first_y;
-    int second_one_y;
-    int second_two_y;
     int third_one_y;
     int third_two_y;
     int four_one_x;
@@ -144,24 +135,18 @@ int hasForcedNeighbours(Noeud &current, int direction, std::vector<std::vector<i
     int four_two_x;
     int four_two_y;
     if(direction == 1){
-        return (hasForcedNeighbours(current,0,grid) ||  hasForcedNeighbours(current,2,grid));
+        return (hasForcedNeighbours(current,0) ||  hasForcedNeighbours(current,2));
     }
     if(direction == 3){
-        return (hasForcedNeighbours(current,2,grid) ||  hasForcedNeighbours(current,4,grid));
+        return (hasForcedNeighbours(current,2) ||  hasForcedNeighbours(current,4));
     }
     if(direction == 5){
-        return (hasForcedNeighbours(current,4,grid) ||  hasForcedNeighbours(current,6,grid));
+        return (hasForcedNeighbours(current,4) ||  hasForcedNeighbours(current,6));
     }
     if(direction == 7){
-        return (hasForcedNeighbours(current,6,grid) ||  hasForcedNeighbours(current,0,grid));
+        return (hasForcedNeighbours(current,6) ||  hasForcedNeighbours(current,0));
     }
     if(direction == 0){ // up
-        first_x = current.x;
-        first_y = current.y + 1;
-        second_one_x = current.x-1;
-        second_one_y = current.y+1;
-        second_two_x = current.x+1;
-        second_two_y = current.y+1;
         third_one_x = current.x-1;
         third_one_y = current.y;
         third_two_x = current.x+1;
@@ -172,12 +157,6 @@ int hasForcedNeighbours(Noeud &current, int direction, std::vector<std::vector<i
         four_two_y = current.y-1;
     }
     if(direction == 2){ // right
-        first_x = current.x-1;
-        first_y = current.y;
-        second_one_x = current.x-1;
-        second_one_y = current.y-1;
-        second_two_x = current.x-1;
-        second_two_y = current.y+1;
         third_one_x = current.x;
         third_one_y = current.y-1;
         third_two_x = current.x;
@@ -188,12 +167,6 @@ int hasForcedNeighbours(Noeud &current, int direction, std::vector<std::vector<i
         four_two_y = current.y+1;
     }
     if(direction == 4){ // down
-        first_x = current.x;
-        first_y = current.y-1;
-        second_one_x = current.x+1;
-        second_one_y = current.y-1;
-        second_two_x = current.x-1;
-        second_two_y = current.y-1;
         third_one_x = current.x+1;
         third_one_y = current.y;
         third_two_x = current.x-1;
@@ -204,12 +177,6 @@ int hasForcedNeighbours(Noeud &current, int direction, std::vector<std::vector<i
         four_two_y = current.y+1;
     }
     if(direction == 6){ // left
-        first_x = current.x+1;
-        first_y = current.y;
-        second_one_x = current.x+1;
-        second_one_y = current.y+1;
-        second_two_x = current.x+1;
-        second_two_y = current.y-1;
         third_one_x = current.x;
         third_one_y = current.y+1;
         third_two_x = current.x;
@@ -219,19 +186,19 @@ int hasForcedNeighbours(Noeud &current, int direction, std::vector<std::vector<i
         four_two_x = current.x-1;
         four_two_y = current.y-1;
     }
-    if(third_one_x >= 0 && third_one_x < grid[0].size() && third_one_y >= 0 && third_one_y < grid[0].size()){
-        if(grid[third_one_x][third_one_y] == 1){
-            if(four_one_x >= 0 && four_one_x < grid[0].size() && four_one_y >= 0 && four_one_y < grid[0].size()){
-                if(grid[four_one_x][four_one_y] == 0){
+    if(exist_in_the_map(third_one_x, third_one_y)){
+        if(obstacle_in_the_map(third_one_x, third_one_y)){
+            if(exist_in_the_map(four_one_x, four_one_y)){
+                if(obstacle_in_the_map(four_one_x, four_one_y) == false){
                     return 1; // forced
                 }
             }
         }
     }
-    if(third_two_x >= 0 && third_two_x < grid[0].size() && third_two_y >= 0 && third_two_y < grid[0].size()){
-        if(grid[third_two_x][third_two_y] == 1){
-            if(four_two_x >= 0 && four_two_x < grid[0].size() && four_two_y >= 0 && four_two_y < grid[0].size()){
-                if(grid[four_two_x][four_two_y] == 0){
+    if(exist_in_the_map(third_two_x, third_two_y)){
+        if(obstacle_in_the_map(third_two_x, third_two_y)){
+            if(exist_in_the_map(four_two_x, four_two_y)){
+                if(obstacle_in_the_map(four_two_x, four_two_y) == false){
                     return 1; // forced
                 }
             }
@@ -240,30 +207,30 @@ int hasForcedNeighbours(Noeud &current, int direction, std::vector<std::vector<i
     return 0; // Not forced
 }
 
-Noeud jump(Noeud &current, int direction, Noeud &start, Noeud &goal, std::vector<std::vector<int>> grid, int pid_parent, int depth)
+Noeud JPS::jump(Noeud &current, int direction, int pid_parent, int depth)
 {   
     Noeud new_node = step(current, direction);
     // Put one id/pid to the node and compute heuristic
-    new_node.id = new_node.x * grid[0].size() + new_node.y;
+    new_node.id = new_node.x * this->n + new_node.y;
     new_node.pid = pid_parent;
-    new_node.compute_heuristic(goal);
-    // outside the grid
-    if (new_node.x < 0 || new_node.x >= grid[0].size() || new_node.y < 0 || new_node.y >= grid[0].size())
+    new_node.compute_heuristic(this->goal);
+    // outside the this->map_normal
+    if (exist_in_the_map(new_node.x, new_node.y) == false)
     {   
         return Noeud(-1, -1, -1, -1, -1);
     }
     // Obstacle
-    if (grid[new_node.x][new_node.y] == 1)
+    if (obstacle_in_the_map(new_node.x, new_node.y))
     {
         return Noeud(-1, -1, -1, -1, -1);
     }
-    // Goal
-    if (new_node.x == goal.x && new_node.y == goal.y)
+    // this->goal
+    if (new_node.x == this->goal.x && new_node.y == this->goal.y)
     {   
         return new_node;
     }
     // Forced neighbours
-    int res = hasForcedNeighbours(new_node, direction, grid);
+    int res = hasForcedNeighbours(new_node, direction);
     if(res == 1){
         return new_node;
     }
@@ -275,33 +242,33 @@ Noeud jump(Noeud &current, int direction, Noeud &start, Noeud &goal, std::vector
     {   
         if (direction == 7)
         {
-            if (jump(new_node, direction - 1, start, goal, grid, pid_parent, 0).id != -1 || jump(new_node, 0, start, goal, grid, pid_parent, 0).id != -1)
+            if (jump(new_node, direction - 1,pid_parent, 0).id != -1 || jump(new_node, 0, pid_parent, 0).id != -1)
             {
                 return new_node;
             }
         }
         else
         {
-            if (jump(new_node, direction - 1, start, goal, grid, pid_parent, 0).id != -1 || jump(new_node, direction + 1, start, goal, grid, pid_parent, 0).id != -1)
+            if (jump(new_node, direction - 1, pid_parent, 0).id != -1 || jump(new_node, direction + 1, pid_parent, 0).id != -1)
             {
                 return new_node;
             }
         }
     }
     // Straight move and it is free to go --> recursive call to jump()
-    return jump(new_node, direction, start, goal, grid, pid_parent, depth);
+    return jump(new_node, direction, pid_parent, depth);
 }
 
-std::vector<Noeud> compute_path(std::vector<Noeud> closed_list, Noeud &goal, Noeud &start, std::vector<std::vector<int>> grid)
+std::vector<Noeud> JPS::compute_path(std::vector<Noeud> closed_list,  Noeud& current)
 {   
     std::vector<Noeud> path;
-    Noeud current = goal;
     path.push_back(current);
     int i = 0;
     while(current.id != 0){
         if(current.pid == closed_list[i].id){
             path.push_back(closed_list[i]);
             current = closed_list[i];
+            current.print_Noeud();
             i = 0;
         }
         else{
@@ -311,23 +278,38 @@ std::vector<Noeud> compute_path(std::vector<Noeud> closed_list, Noeud &goal, Noe
     return path;
 }
 
-std::vector<Noeud> Jump_Search(Noeud &start, Noeud &goal, std::vector<std::vector<int>> grid)
+bool JPS::exist_in_the_map(int x, int y){
+    if(x < 0 || y < 0 || x>=this->n || y>=this->n){
+        return false;
+    }
+    else{
+        return true;
+    }
+}
+
+bool JPS::obstacle_in_the_map(int x, int y){
+    uint32_t word = this->map_normal[x][floor(y/32)];
+    int item = (31-(y%31));
+    return CHECK_BIT(word, item);
+}
+
+std::vector<Noeud> JPS::Jump_Search()
 {
     std::priority_queue<Noeud, std::vector<Noeud>, Compare> open_list;
     std::vector<Noeud> closed_list;
     std::vector<Noeud> path;
     std::vector<Noeud> moves;
-    open_list.push(start);
+    open_list.push(this->start);
     while (open_list.empty() != true)
     {   
         Noeud current = open_list.top();
         open_list.pop();
-        // check if the current node is the goal
-        if (current.x == goal.x && current.y == goal.y)
+        // check if the current node is the this->goal
+        if (current.x == this->goal.x && current.y == this->goal.y)
         {   
             closed_list.push_back(current);
             // Recompute the path from the nodes visited
-            path = compute_path(closed_list, current, start, grid);
+            path = compute_path(closed_list, current);
             return path;
         }
         else // Perform JPS algorithm
@@ -336,21 +318,21 @@ std::vector<Noeud> Jump_Search(Noeud &start, Noeud &goal, std::vector<std::vecto
             for (int i = 0; i < moves.size(); i++)
             {   
                 // Put one id to the node and Compute heuristic
-                moves[i].id = moves[i].x * grid[0].size() + moves[i].y;
-                moves[i].compute_heuristic(goal);
+                moves[i].id = moves[i].x * this->map_normal[0].size() + moves[i].y;
+                moves[i].compute_heuristic(this->goal);
                 // Check if outside the gird or in obstacle
-                if (moves[i].x < 0 || moves[i].x >= grid[0].size() || moves[i].y < 0 || moves[i].y >= grid[0].size() || grid[moves[i].x][moves[i].y] == 1)
+                if (exist_in_the_map(moves[i].x, moves[i].y) == false || obstacle_in_the_map(moves[i].x, moves[i].y))
                 {   
                     continue;
                 }
                 // Jump algorithm
-                Noeud new_noeud = jump(current, direction(current, moves[i]), start, goal, grid, current.id, 0);
+                Noeud new_noeud = jump(current, direction(current, moves[i]), current.id, 0);
                 new_noeud.cost = current.cost+sqrt(pow(current.x-new_noeud.x,2) + pow(current.y-new_noeud.y,2));
                 if (new_noeud.id == -1) // No jump point
                 {
                     continue;
                 }
-                if (new_noeud.x == goal.x && new_noeud.y == goal.y) // GOAL, we break the loop
+                if (new_noeud.x == this->goal.x && new_noeud.y == this->goal.y) // this->goal, we break the loop
                 {
                     open_list.push(new_noeud);
                     break;
@@ -366,10 +348,10 @@ std::vector<Noeud> Jump_Search(Noeud &start, Noeud &goal, std::vector<std::vecto
                     open_list.push(new_noeud);
                 }
             }
-            //sleep(1);
             // Put the current node into the visited closed list
             closed_list.push_back(current);
         }
     }
     cout << "NO PATH";
+    return closed_list;
 }

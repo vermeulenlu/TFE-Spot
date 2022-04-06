@@ -28,7 +28,8 @@
 #include "include/jump_point_search.hpp"
 #include "include/lpa_star.hpp"
 #include "JPS.hpp"
-
+#include <bits/stdc++.h>
+#include <random>
 
 using namespace std::chrono_literals;
 
@@ -300,6 +301,7 @@ int main (int argc, char** argv)
   // int width = (MaxPt.x - MinPt.x)+margin;
   // int height = (MaxPt.y - MinPt.y)+margin;
   // double dimension = int(std::max(width,height)/resolution);
+  // dimension = (floor(dimension/32) + 1)*32;
   // int width_map = int(dimension);
   // int height_map = int(dimension);
   // int radius_inflate = int(0.3/resolution);
@@ -308,6 +310,7 @@ int main (int argc, char** argv)
 
   // // My grid on which I will perform Path P
   // std::vector<std::vector<int>> map(width_map, std::vector<int>(height_map, 0));
+  // std::vector<std::vector<int>> map_transpose(dimension, std::vector<int>(dimension,0));
   // pcl::KdTreeFLANN<pcl::PointXYZ> kdtree;
   // kdtree.setInputCloud(filtred_cloud_ptr);
   // pcl::PointXYZ searchPoint;
@@ -349,8 +352,10 @@ int main (int argc, char** argv)
   //   }
   // }
 
-  std::vector<std::vector<int>> map(8, std::vector<int>(8,0));
-  int dimension = 8;
+  // FOR DEBUG
+  int dimension = 32;
+  std::vector<std::vector<int>> map(dimension, std::vector<int>(dimension,0));
+  std::vector<std::vector<int>> map_transpose(dimension, std::vector<int>(dimension,0));
   map[0][5] = 1;
   map[1][5] = 1;
   map[2][5] = 1;
@@ -366,30 +371,67 @@ int main (int argc, char** argv)
   map[2][1] = 1;
   map[3][1] = 1;
   map[4][1] = 1;
-  
+
+  // // Random MAP
+  // int a, b;
+  // srand ( time(NULL) );
+  // for(int i=0; i<dimension*dimension/6; i++){
+  //   a = rand() % dimension;
+  //   b = rand() % dimension;
+  //   map[a][b] = 1;
+  // }
+
+  // Computation transpose
+  for(int row=0; row<map.size();row++){
+    for(int col=0; col<map[0].size();col++){
+      map_transpose[row][col] = map[col][row]; 
+    }
+  }
+  // Computation of normal+transpose bit map on 32 bits int 
+  std::vector<std::vector<uint32_t>> map_bit_normal(dimension, std::vector<uint32_t>(int(map[0].size()/32),0));
+  std::vector<std::vector<uint32_t>> map_bit_transpose(dimension, std::vector<uint32_t>(int(map[0].size()/32),0));
+  for(int i=0; i<map.size(); i++){
+    for(int j=0; j<map[0].size(); j++){
+      if(map[i][j]==1){
+        map_bit_normal[i][floor(j/32)] = map_bit_normal[i][floor(j/32)] | uint32_t(pow(2,(31-(j%31))));
+      }
+      if(map_transpose[i][j] == 1){
+        map_bit_transpose[i][floor(j/32)] = map_bit_transpose[i][floor(j/32)] | uint32_t(pow(2,(31-(j%31))));
+      }
+    }
+  }
   time_req = clock() - time_req;
 	cout << "Process grid " << (float)time_req/CLOCKS_PER_SEC << " seconds" << endl;
 
   // Creating goal and start position
   int n = dimension;
 
-  Noeud start(50, 30, 0, 0, 0);
-  Noeud goal(52,175, 0, 0, 0);
+  Noeud start(0, 0, 0, 0, 0);
+  Noeud goal(dimension-1,dimension-1, 0, 0, 0);
 
   start.id = 0;
   start.pid = 0;
   goal.id = goal.x * n + goal.y;
   start.h = abs(start.x - goal.x) + abs(start.y - goal.y);
 
-  std::vector<std::vector<int>> main_grid = map;
   time_req = clock();
-  std::vector<Noeud> result = Jump_Search(start, goal, main_grid);
+  
+  JPS jps(map_bit_normal, map_bit_transpose, start, goal, n);
+  std::vector<Noeud> result = jps.Jump_Search();
+
   time_req = clock() - time_req;
 	cout << "JPS : " << (float)time_req/CLOCKS_PER_SEC << " seconds" << endl;
   for(int k=0; k<result.size(); k++){
-    main_grid[result[k].x][result[k].y] = 3;
+    map[result[k].x][result[k].y] = 3;
   }
-  Print_Map(main_grid, dimension,"../JPS.txt");
+  Print_Map(map, dimension,"../JPS.txt");
+
+
+
+
+
+
+
   // time_req = clock();
   // std::cout << "--------------------------------------------------------" << '\n'
   //           << "--------------------- ALGORITHM: A* ---------------------" << '\n'
