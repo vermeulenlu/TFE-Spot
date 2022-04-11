@@ -19,7 +19,7 @@ for x in f_JPS:
     j = 0
     for y in x:
         if( y != "\n"):
-            map_JPS[j][i] = int(y)
+            map_JPS[i][j] = int(y)
         j += 1
     i += 1
 f.close() 

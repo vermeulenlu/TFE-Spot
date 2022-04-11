@@ -352,12 +352,29 @@ int main (int argc, char** argv)
   //   }
   // }
 
-  // FOR DEBUG
+  // Creating goal and start position
   int dimension = 32;
+  int n = dimension;
+
+  Noeud start(1, 1, 0, 0, 0);
+  Noeud goal(20, 20, 0, 0, 0);
+
+  start.id = 0;
+  start.pid = 0;
+  goal.id = goal.x * n + goal.y;
+  start.h = abs(start.x - goal.x) + abs(start.y - goal.y);
+
+  // FOR DEBUG
   std::vector<std::vector<int>> map(dimension, std::vector<int>(dimension,0));
   std::vector<std::vector<int>> map_transpose(dimension, std::vector<int>(dimension,0));
-  map[0][5] = 1;
-  map[1][5] = 1;
+  map[goal.x][goal.y] = 1;
+
+  map[2][2] = 1;
+  map[1][10] = 1;
+  map[1][10] = 1;
+  map[2][10] = 1;
+  map[3][10] = 1;
+  map[0][31] = 1;
   map[2][5] = 1;
   map[3][5] = 1;
   map[4][5] = 1;
@@ -387,7 +404,7 @@ int main (int argc, char** argv)
       map_transpose[row][col] = map[col][row]; 
     }
   }
-  // Computation of normal+transpose bit map on 32 bits int 
+  // Computation of normal + transpose bit map on 32 bits int 
   std::vector<std::vector<uint32_t>> map_bit_normal(dimension, std::vector<uint32_t>(int(map[0].size()/32),0));
   std::vector<std::vector<uint32_t>> map_bit_transpose(dimension, std::vector<uint32_t>(int(map[0].size()/32),0));
   for(int i=0; i<map.size(); i++){
@@ -403,20 +420,10 @@ int main (int argc, char** argv)
   time_req = clock() - time_req;
 	cout << "Process grid " << (float)time_req/CLOCKS_PER_SEC << " seconds" << endl;
 
-  // Creating goal and start position
-  int n = dimension;
-
-  Noeud start(0, 0, 0, 0, 0);
-  Noeud goal(dimension-1,dimension-1, 0, 0, 0);
-
-  start.id = 0;
-  start.pid = 0;
-  goal.id = goal.x * n + goal.y;
-  start.h = abs(start.x - goal.x) + abs(start.y - goal.y);
-
   time_req = clock();
   
   JPS jps(map_bit_normal, map_bit_transpose, start, goal, n);
+  //(jps.jump_improved(start, 4, 0, 0)).print_Noeud();
   std::vector<Noeud> result = jps.Jump_Search();
 
   time_req = clock() - time_req;

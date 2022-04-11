@@ -47,4 +47,5 @@ class JPS{
     std::vector<Noeud> compute_path(std::vector<Noeud> closed_list, Noeud& current);
     bool exist_in_the_map(int x, int y);
     bool obstacle_in_the_map(int x, int y);
+    Noeud jump_improved(Noeud &current, int direction, int pid_parent, int depth);
 };
