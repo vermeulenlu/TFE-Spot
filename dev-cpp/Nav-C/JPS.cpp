@@ -5,8 +5,6 @@
 #include <math.h>
 #include "JPS.hpp"
 #include <unistd.h>
-#include <strings.h>
-#include <string.h>
 #include <cstdlib>
 #define CHECK_BIT(var,pos) ((var) & (1<<(pos)))
 
@@ -51,7 +49,7 @@ std::vector<Noeud> JPS::actions(Noeud& current)
 int JPS::direction(Noeud &parent, Noeud &child)
 {
     int a = parent.x - child.x; // -1: droite 1: gauche
-    int b = parent.y - child.y; // -1: bas 1: haut
+    int b = parent.y - child.y; // -1: bas 1:haut
     if (a == 0 && b == 1)
     {
         return 0;
@@ -92,15 +90,15 @@ int JPS::direction(Noeud &parent, Noeud &child)
 
 Noeud JPS::step(Noeud &parent, int direction)
 {
-    if (direction == 0) // left
+    if (direction == 0)
     {
         return Noeud(parent.x, parent.y - 1, parent.cost + 1, 0, parent.id);
     }
-    if (direction == 1) 
+    if (direction == 1)
     {
         return Noeud(parent.x + 1, parent.y - 1, parent.cost + sqrt(2), 0, parent.id);
     }
-    if (direction == 2) // down
+    if (direction == 2)
     {
         return Noeud(parent.x + 1, parent.y, parent.cost + 1, 0, parent.id);
     }
@@ -108,7 +106,7 @@ Noeud JPS::step(Noeud &parent, int direction)
     {
         return Noeud(parent.x + 1, parent.y + 1, parent.cost + sqrt(2), 0, parent.id);
     }
-    if (direction == 4) // right
+    if (direction == 4)
     {
         return Noeud(parent.x, parent.y + 1, parent.cost + 1, 0, parent.id);
     }
@@ -116,7 +114,7 @@ Noeud JPS::step(Noeud &parent, int direction)
     {
         return Noeud(parent.x - 1, parent.y + 1, parent.cost + sqrt(2), 0, parent.id);
     }
-    if (direction == 6) // up
+    if (direction == 6)
     {
         return Noeud(parent.x - 1, parent.y, parent.cost + 1, 0, parent.id);
     }
@@ -209,250 +207,6 @@ int JPS::hasForcedNeighbours(Noeud &current, int direction){
     return 0; // Not forced
 }
 
-Noeud JPS::jump_improved(Noeud &current, int direction, int pid_parent, int depth)
-{   
-    Noeud new_node = step(current, direction);
-    // Put one id/pid to the node and compute heuristic
-    new_node.id = new_node.x * this->n + new_node.y;
-    new_node.pid = pid_parent;
-    new_node.compute_heuristic(this->goal);
-    // outside the map or obstacle
-    if (exist_in_the_map(new_node.x, new_node.y) == false || obstacle_in_the_map(new_node.x, new_node.y))
-    {   
-        return Noeud(-1, -1, -1, -1, -1);
-    }
-    // Diagonal move
-    if (direction == 1 || direction == 3 || direction == 5 || direction == 7)
-    {   
-        if (direction == 7)
-        {
-            if (jump_improved(new_node, direction - 1,pid_parent, 0).id != -1 || jump_improved(new_node, 0, pid_parent, 0).id != -1)
-            {
-                return new_node;
-            }
-            else{
-                return jump_improved(new_node, direction, pid_parent, 0);
-            }
-        }
-        else
-        {
-            if (jump_improved(new_node, direction - 1, pid_parent, 0).id != -1 || jump_improved(new_node, direction + 1, pid_parent, 0).id != -1)
-            {
-                return new_node;
-            }
-            else{
-                return jump_improved(new_node, direction, pid_parent, 0);
-            }
-        }
-    }
-
-    //////////////////////////////////////////
-    /////////// JUMPING RULES ////////////////
-    //////////////////////////////////////////
-
-    uint32_t B_s;
-    uint32_t forced_up;
-    uint32_t forced_down;
-
-    // Straight move to the right
-    if(direction == 4){
-        int res;
-        int fls_res;
-        int floor_res_y = floor(new_node.y/32);
-
-        for(int i=floor_res_y; i<this->n/32; i++){
-            // Forced neighbours check
-            forced_up = 0;
-            forced_down = 0;
-            if(new_node.x-1 >=0 && new_node.x-1 < this->n){
-                forced_up = ((this->map_normal[new_node.x-1][i] << 1) & ~(this->map_normal[new_node.x-1][i]));
-            }
-            if(new_node.x+1 >=0 && new_node.x+1 < this->n){
-                forced_down = ((this->map_normal[new_node.x+1][i] << 1) & ~(this->map_normal[new_node.x+1][i]));
-            }
-            // Put forced neighbours in the computation
-            B_s = this->map_normal[new_node.x][i] | forced_up | forced_down;
-            if(i==floor_res_y){
-                fls_res = __builtin_clz(((B_s << (new_node.y%31)) >> (new_node.y%31)));
-            }
-            else{
-                fls_res = __builtin_clz(B_s);
-            }
-            // Check the result
-            if((fls_res!=31 || (B_s >> 31) == 1)){
-                // Obstacle found ! --> return JUMP POINT 
-                res = i*31 + fls_res;
-                // Checking if it is the goal
-                if(new_node.x == this->goal.x && res==this->goal.y){
-                    Noeud result = Noeud(new_node.x, res, 0, 0, pid_parent);
-                    result.id = result.x * this->n + result.y;
-                    return result;
-                }
-                Noeud result = Noeud(new_node.x, res-1, 0, 0, pid_parent);
-                result.id = result.x * this->n + result.y;
-                if(result.y == new_node.y-1){
-                    continue;
-                }
-                return result;
-            }
-            else{
-                continue;
-            }
-        }
-        // end of the grid --> no obstacle !
-        return Noeud(-1, -1, -1, -1, -1);
-    }
-
-    // Straight move to the left
-    if(direction == 0){
-        int res;
-        int ffs_res;
-        int floor_res_y = floor(new_node.y/32);
-
-        for(int i=floor_res_y; i>=0; i--){
-            // Forced neighbours check
-            forced_up = 0;
-            forced_down = 0;
-            if(new_node.x-1 >=0 && new_node.x-1 < this->n){
-                forced_up = ((this->map_normal[new_node.x-1][i] >> 1) & ~(this->map_normal[new_node.x-1][i])) << 1;
-            }
-            if(new_node.x+1 >=0 && new_node.x+1 < this->n){
-                forced_down = ((this->map_normal[new_node.x+1][i] >> 1) & ~(this->map_normal[new_node.x+1][i])) << 1;
-            }
-            // Put forced neighbours in the computation
-            B_s = this->map_normal[new_node.x][i] | forced_up | forced_down;
-            if(i==floor_res_y){
-                ffs_res = ffs(((B_s >> (31-new_node.y%31)) << (31-new_node.y%31)));
-            }
-            else{
-                ffs_res = ffs(B_s);
-            }
-
-            if(ffs_res!=0 || (B_s >> 31) == 1){
-                // Obstacle found ! --> return JUMP POINT 
-                res = i*31 + 32-ffs_res;
-                cout << res << endl;
-                // Checking if it is the goal
-                if(new_node.x == this->goal.x && res==this->goal.y){
-                    Noeud result = Noeud(new_node.x, res, 0, 0, pid_parent);
-                    result.id = result.x * this->n + result.y;
-                    return result;
-                }
-                Noeud result = Noeud(new_node.x, res+1, 0, 0, pid_parent);
-                result.id = result.x * this->n + result.y;
-                if(result.y == new_node.y+1){
-                    continue;
-                }
-                return result;
-            }
-            else{
-                continue;
-            }
-        }
-        // end of the grid --> no obstacle !
-        return Noeud(-1, -1, -1, -1, -1);
-    }
-
-    // Straight move to the down
-    if(direction == 2){
-        int res;
-        int fls_res;
-        int floor_res_x = floor(new_node.x/32);
-
-        for(int i=floor_res_x; i<this->n/32; i++){
-            // Forced neighbours check
-            forced_up = 0;
-            forced_down = 0;
-            if(new_node.y-1 >=0 && new_node.y-1 < this->n){
-                forced_up = ((this->map_transpose[new_node.y-1][i] << 1) & ~(this->map_transpose[new_node.y-1][i]));
-            }
-            if(new_node.x+1 >=0 && new_node.x+1 < this->n){
-                forced_down = ((this->map_transpose[new_node.y+1][i] << 1) & ~(this->map_transpose[new_node.y+1][i]));
-            }
-            // Put forced neighbours in the computation
-            B_s = this->map_transpose[new_node.y][i] | forced_up | forced_down;
-
-            if(i==floor_res_x){
-                fls_res = __builtin_clz(((B_s << (new_node.x%31)) >> (new_node.x%31)));
-            }
-            else{
-                fls_res = __builtin_clz(B_s);
-            }
-            if(fls_res!=31 || (B_s >> 31) == 1){
-                // Obstacle found ! --> return JUMP POINT 
-                res = i*31 + fls_res;
-                // Checking if it is the goal
-                if(res == this->goal.x && new_node.y==this->goal.y){
-                    Noeud result = Noeud(res, new_node.y, 0, 0, pid_parent);
-                    result.id = result.x * this->n + result.y;
-                    return result;
-                }
-                Noeud result = Noeud(res-1, new_node.y, 0, 0, pid_parent);
-                result.id = result.x * this->n + result.y;
-                if(result.x == new_node.x-1){
-                    continue;
-                }
-                return result;
-            }
-            else{
-                continue;
-            }
-        }
-        // end of the grid --> no obstacle !
-        return Noeud(-1, -1, -1, -1, -1);
-    }
-    
-    // Straight move to the up
-    if(direction == 6){
-        int res;
-        int ffs_res;
-        int floor_res_x = floor(new_node.x/32);
-
-        for(int i=floor_res_x; i>=0; i--){
-            // Forced neighbours check
-            forced_up = 0;
-            forced_down = 0;
-            if(new_node.y-1 >=0 && new_node.y-1 < this->n){
-                forced_up = ((this->map_transpose[new_node.y-1][i] >> 1) & ~(this->map_transpose[new_node.y-1][i])) << 1;
-            }
-            if(new_node.y+1 >=0 && new_node.y+1 < this->n){
-                forced_down = ((this->map_transpose[new_node.y+1][i] >> 1) & ~(this->map_transpose[new_node.y+1][i])) << 1;
-            }
-            // Put forced neighbours in the computation
-            B_s = this->map_transpose[new_node.y][i] | forced_up | forced_down;
-
-            if(i==floor_res_x){
-                ffs_res = ffs(((B_s >> (31-new_node.x%31)) << (31-new_node.x%31)));
-            }
-            else{
-                ffs_res = ffs(B_s);
-            }
-
-            if(ffs_res!=0 || (B_s >> 31) == 1){
-                // Obstacle found ! --> return JUMP POINT 
-                res = i*31 + 32-ffs_res;
-                // Checking if it is the goal
-                if(res == this->goal.x && new_node.y==this->goal.y){
-                    Noeud result = Noeud(res, new_node.y, 0, 0, pid_parent);
-                    result.id = result.x * this->n + result.y;
-                    return result;
-                }
-                Noeud result = Noeud(res+1, new_node.y, 0, 0, pid_parent);
-                result.id = result.x * this->n + result.y;
-                if(result.x == new_node.x+1){
-                    continue;
-                }
-                return result;
-            }
-            else{
-                continue;
-            }
-        }
-        // end of the grid --> no obstacle !
-        return Noeud(-1, -1, -1, -1, -1);
-    }
-}
-
 Noeud JPS::jump(Noeud &current, int direction, int pid_parent, int depth)
 {   
     Noeud new_node = step(current, direction);
@@ -514,7 +268,7 @@ std::vector<Noeud> JPS::compute_path(std::vector<Noeud> closed_list,  Noeud& cur
         if(current.pid == closed_list[i].id){
             path.push_back(closed_list[i]);
             current = closed_list[i];
-            current.print_Noeud();
+            // current.print_Noeud();
             i = 0;
         }
         else{
@@ -538,6 +292,52 @@ bool JPS::obstacle_in_the_map(int x, int y){
     int item = (31-(y%31));
     return CHECK_BIT(word, item);
 }
+
+// CODE FROM https://www.geeksforgeeks.org/bresenhams-line-generation-algorithm/ 
+bool JPS::Bresenham(int x1, int y1, int x2, int y2, int dx, int dy, int decide)
+{   
+	int pk = 2 * dy - dx;
+	for (int i = 0; i < dx; i++)
+	{   
+		x1 < x2 ? x1++ : x1--;
+		if (pk < 0)
+		{
+			if (decide == 0)
+			{
+			    if(obstacle_in_the_map(x1,y1)){
+                    return true;
+                }
+				pk = pk + 2 * dy;
+			}
+			else
+			{
+                if(obstacle_in_the_map(y1,x1)){
+                    return true;
+                }
+				pk = pk + 2 * dy;
+			}
+		}
+		else
+		{
+			y1 < y2 ? y1++ : y1--;
+			if (decide == 0)
+			{
+                if(obstacle_in_the_map(x1,y1)){
+                    return true;
+                }
+			}
+			else
+			{
+                if(obstacle_in_the_map(y1,x1)){
+                    return true;
+                }
+			}
+			pk = pk + 2 * dy - 2 * dx;
+		}
+	}
+    return false;
+}
+
 
 std::vector<Noeud> JPS::Jump_Search()
 {
@@ -572,13 +372,10 @@ std::vector<Noeud> JPS::Jump_Search()
                     continue;
                 }
                 // Jump algorithm
-                cout << "checking in the direction : " << direction(current, moves[i]) << endl;
-                Noeud new_noeud = jump_improved(current, direction(current, moves[i]), current.id, 0);
+                Noeud new_noeud = jump(current, direction(current, moves[i]), current.id, 0);
                 new_noeud.cost = current.cost+sqrt(pow(current.x-new_noeud.x,2) + pow(current.y-new_noeud.y,2));
-                new_noeud.compute_heuristic(this->goal);
                 if (new_noeud.id == -1) // No jump point
-                {   
-                    cout << "no jump point" << endl;
+                {
                     continue;
                 }
                 if (new_noeud.x == this->goal.x && new_noeud.y == this->goal.y) // this->goal, we break the loop
@@ -594,14 +391,11 @@ std::vector<Noeud> JPS::Jump_Search()
                     }
                 }
                 if(k == 0){
-                    new_noeud.print_Noeud();
                     open_list.push(new_noeud);
                 }
             }
-            //sleep(1);
             // Put the current node into the visited closed list
             closed_list.push_back(current);
-            cout << " " << endl;
         }
     }
     cout << "NO PATH";

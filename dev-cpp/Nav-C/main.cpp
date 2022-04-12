@@ -255,139 +255,121 @@ void Print_Map(std::vector<std::vector<int>>& map, int dim, std::string folder_n
 // --------------
 int main (int argc, char** argv)
 {
-  // pcl::visualization::PCLVisualizer::Ptr viewer(new pcl::visualization::PCLVisualizer ("3D Viewer"));
-  // viewer->setBackgroundColor(0, 0, 0);
-  // pcl::PointCloud<pcl::PointXYZRGB>::Ptr basic_cloud_ptr (new pcl::PointCloud<pcl::PointXYZRGB>);
-  // vizualize_saved_slam(basic_cloud_ptr, viewer, "../"); // Tu dois mettres le path pour le folder où tu as mis le folder save que je te passe
-  // //   while (!viewer->wasStopped()) {
-  // //   viewer->spinOnce(100);
-  // //     std::this_thread::sleep_for(std::chrono::milliseconds(1));
-  // // }
+  pcl::visualization::PCLVisualizer::Ptr viewer(new pcl::visualization::PCLVisualizer ("3D Viewer"));
+  viewer->setBackgroundColor(0, 0, 0);
+  pcl::PointCloud<pcl::PointXYZRGB>::Ptr basic_cloud_ptr (new pcl::PointCloud<pcl::PointXYZRGB>);
+  vizualize_saved_slam(basic_cloud_ptr, viewer, "../"); // Tu dois mettres le path pour le folder où tu as mis le folder save que je te passe
+  //   while (!viewer->wasStopped()) {
+  //   viewer->spinOnce(100);
+  //     std::this_thread::sleep_for(std::chrono::milliseconds(1));
+  // }
 
   clock_t time_req;
-  // // pcl::PointCloud<pcl::PointXYZ>::Ptr basic_cloud_ptr (new pcl::PointCloud<pcl::PointXYZ>);
-  // // if (pcl::io::loadPCDFile<pcl::PointXYZ> ("../save/cloud_0.pcd", *basic_cloud_ptr) == -1) //* load the file
-  // // {
-  // //    PCL_ERROR ("Couldn't read file test_pcd.pcd \n");
-  // //    return (-1);
-  // // }
+  // pcl::PointCloud<pcl::PointXYZ>::Ptr basic_cloud_ptr (new pcl::PointCloud<pcl::PointXYZ>);
+  // if (pcl::io::loadPCDFile<pcl::PointXYZ> ("../save/cloud_0.pcd", *basic_cloud_ptr) == -1) //* load the file
+  // {
+  //    PCL_ERROR ("Couldn't read file test_pcd.pcd \n");
+  //    return (-1);
+  // }
 
   time_req = clock();
 
-  // // Filter to keep only a part of the point cloud and save it into another one
-  // pcl::PointCloud<pcl::PointXYZ>::Ptr filtred_cloud_ptr (new pcl::PointCloud<pcl::PointXYZ>);
-  // basic_cloud_ptr->width = basic_cloud_ptr->size ();
-  // basic_cloud_ptr->height = 1;
-  // std::cout << "Width :" << basic_cloud_ptr->width << std::endl;
-  // for(int i=0; i<basic_cloud_ptr->width*basic_cloud_ptr->height ; i++){
-  //   if(basic_cloud_ptr->points[i].z < 0.6 && basic_cloud_ptr->points[i].z > 0.4){
-  //     pcl::PointXYZ adding_point;
-  //     adding_point.x = basic_cloud_ptr->points[i].x;
-  //     adding_point.y = basic_cloud_ptr->points[i].y;
-  //     adding_point.z = 0.0;
-  //     filtred_cloud_ptr->points.push_back(adding_point);
-  //   }
-  // }
+  // Filter to keep only a part of the point cloud and save it into another one
+  pcl::PointCloud<pcl::PointXYZ>::Ptr filtred_cloud_ptr (new pcl::PointCloud<pcl::PointXYZ>);
+  basic_cloud_ptr->width = basic_cloud_ptr->size ();
+  basic_cloud_ptr->height = 1;
+  for(int i=0; i<basic_cloud_ptr->width*basic_cloud_ptr->height ; i++){
+    if(basic_cloud_ptr->points[i].z < 0.6 && basic_cloud_ptr->points[i].z > 0.4){
+      pcl::PointXYZ adding_point;
+      adding_point.x = basic_cloud_ptr->points[i].x;
+      adding_point.y = basic_cloud_ptr->points[i].y;
+      adding_point.z = 0.0;
+      filtred_cloud_ptr->points.push_back(adding_point);
+    }
+  }
 
-  // // Add informations about the pointcloud
-  // filtred_cloud_ptr->width = filtred_cloud_ptr->size ();
-  // filtred_cloud_ptr->height = 1;
-  // pcl::PointXYZ MinPt, MaxPt;
-  // pcl::getMinMax3D (*filtred_cloud_ptr, MinPt, MaxPt);
+  // Add informations about the pointcloud
+  filtred_cloud_ptr->width = filtred_cloud_ptr->size ();
+  filtred_cloud_ptr->height = 1;
+  pcl::PointXYZ MinPt, MaxPt;
+  pcl::getMinMax3D (*filtred_cloud_ptr, MinPt, MaxPt);
 
-  // // Creation of the grid 
-  // double margin = 1.0;
-  // double resolution = 0.20;
-  // int width = (MaxPt.x - MinPt.x)+margin;
-  // int height = (MaxPt.y - MinPt.y)+margin;
-  // double dimension = int(std::max(width,height)/resolution);
-  // dimension = (floor(dimension/32) + 1)*32;
-  // int width_map = int(dimension);
-  // int height_map = int(dimension);
-  // int radius_inflate = int(0.3/resolution);
-  // int k;
-  // int q;
+  // Creation of the grid 
+  double margin = 1.0;
+  double resolution = 0.10;
+  int width = (MaxPt.x - MinPt.x)+margin;
+  int height = (MaxPt.y - MinPt.y)+margin;
+  double dimension = int(std::max(width,height)/resolution);
+  dimension = (floor(dimension/32) + 1)*32;
+  int width_map = int(dimension);
+  int height_map = int(dimension);
+  int radius_inflate = int(0.7/resolution);
+  int k;
+  int q;
 
-  // // My grid on which I will perform Path P
-  // std::vector<std::vector<int>> map(width_map, std::vector<int>(height_map, 0));
-  // std::vector<std::vector<int>> map_transpose(dimension, std::vector<int>(dimension,0));
-  // pcl::KdTreeFLANN<pcl::PointXYZ> kdtree;
-  // kdtree.setInputCloud(filtred_cloud_ptr);
-  // pcl::PointXYZ searchPoint;
-  
-  // // Writing into to map
-  // for(int i=0;i<width_map;i++)
-  // {
-  //   for(int j=0;j<height_map;j++)
-  //   {
-  //     searchPoint.x=(MinPt.x-margin/2) + (i*resolution);
-  //     searchPoint.y=(MinPt.y-margin/2) + (j*resolution);
-  //     searchPoint.z=0;
-    
-  //     int K=1;
-  //     std::vector<int> pointIdxNKNSearch(K);
-  //     std::vector<float> pointNKNSquaredDistance(K);
-  //     if(kdtree.nearestKSearch(searchPoint,K,pointIdxNKNSearch,pointNKNSquaredDistance)>0)
-  //     {
-  //       if(sqrt(pointNKNSquaredDistance[0])<(resolution/2))
-  //       {
-  //         for(k=i-radius_inflate; k<i+radius_inflate; k++){
-  //           if(k<0 || k>=dimension){
-  //             continue;
-  //           }
-  //           for(q=j-radius_inflate; q<j+radius_inflate; q++){
-  //             if(q<0 || q>=dimension){
-  //               continue;
-  //             }
-  //             map[k][q] = 1;
-  //           }
-  //         }
-  //       }
-  //       else{
-  //         if(map[i][j] != 0){
-  //           map[i][j] = 0;
-  //         }
-  //       }
-  //     }
-  //   }
-  // }
-
-  // Creating goal and start position
-  int dimension = 32;
-  int n = dimension;
-
-  Noeud start(1, 1, 0, 0, 0);
-  Noeud goal(20, 20, 0, 0, 0);
-
-  start.id = 0;
-  start.pid = 0;
-  goal.id = goal.x * n + goal.y;
-  start.h = abs(start.x - goal.x) + abs(start.y - goal.y);
-
-  // FOR DEBUG
-  std::vector<std::vector<int>> map(dimension, std::vector<int>(dimension,0));
+  // My grid on which I will perform Path P
+  std::vector<std::vector<int>> map(width_map, std::vector<int>(height_map, 0));
   std::vector<std::vector<int>> map_transpose(dimension, std::vector<int>(dimension,0));
-  map[goal.x][goal.y] = 1;
+  pcl::KdTreeFLANN<pcl::PointXYZ> kdtree;
+  kdtree.setInputCloud(filtred_cloud_ptr);
+  pcl::PointXYZ searchPoint;
+  
+  // Writing into to map
+  for(int i=0;i<width_map;i++)
+  {
+    for(int j=0;j<height_map;j++)
+    {
+      searchPoint.x=(MinPt.x-margin/2) + (i*resolution);
+      searchPoint.y=(MinPt.y-margin/2) + (j*resolution);
+      searchPoint.z=0;
+    
+      int K=1;
+      std::vector<int> pointIdxNKNSearch(K);
+      std::vector<float> pointNKNSquaredDistance(K);
+      if(kdtree.nearestKSearch(searchPoint,K,pointIdxNKNSearch,pointNKNSquaredDistance)>0)
+      {
+        if(sqrt(pointNKNSquaredDistance[0])<(resolution/2))
+        {
+          for(k=i-radius_inflate; k<i+radius_inflate; k++){
+            if(k<0 || k>=dimension){
+              continue;
+            }
+            for(q=j-radius_inflate; q<j+radius_inflate; q++){
+              if(q<0 || q>=dimension){
+                continue;
+              }
+              map[k][q] = 1;
+            }
+          }
+        }
+        else{
+          if(map[i][j] != 0){
+            map[i][j] = 0;
+          }
+        }
+      }
+    }
+  }
 
-  map[2][2] = 1;
-  map[1][10] = 1;
-  map[1][10] = 1;
-  map[2][10] = 1;
-  map[3][10] = 1;
-  map[0][31] = 1;
-  map[2][5] = 1;
-  map[3][5] = 1;
-  map[4][5] = 1;
-  map[5][5] = 1;
-  map[7][3] = 1;
-  map[6][3] = 1;
-  map[5][3] = 1;
-  map[4][3] = 1;
-  map[3][3] = 1;
-  map[2][3] = 1;
-  map[2][1] = 1;
-  map[3][1] = 1;
-  map[4][1] = 1;
+  // //FOR DEBUG
+  // int dimension = 32*50;
+  // std::vector<std::vector<int>> map(dimension, std::vector<int>(dimension,0));
+  // std::vector<std::vector<int>> map_transpose(dimension, std::vector<int>(dimension,0));
+  // map[0][5] = 1;
+  // map[1][5] = 1;
+  // map[2][5] = 1;
+  // map[3][5] = 1;
+  // map[4][5] = 1;
+  // map[5][5] = 1;
+  // map[7][3] = 1;
+  // map[6][3] = 1;
+  // map[5][3] = 1;
+  // map[4][3] = 1;
+  // map[3][3] = 1;
+  // map[2][3] = 1;
+  // map[2][1] = 1;
+  // map[3][1] = 1;
+  // map[4][1] = 1;
 
   // // Random MAP
   // int a, b;
@@ -404,7 +386,7 @@ int main (int argc, char** argv)
       map_transpose[row][col] = map[col][row]; 
     }
   }
-  // Computation of normal + transpose bit map on 32 bits int 
+  // Computation of normal+transpose bit map on 32 bits int 
   std::vector<std::vector<uint32_t>> map_bit_normal(dimension, std::vector<uint32_t>(int(map[0].size()/32),0));
   std::vector<std::vector<uint32_t>> map_bit_transpose(dimension, std::vector<uint32_t>(int(map[0].size()/32),0));
   for(int i=0; i<map.size(); i++){
@@ -417,96 +399,83 @@ int main (int argc, char** argv)
       }
     }
   }
+  cout << " " << endl;
   time_req = clock() - time_req;
 	cout << "Process grid " << (float)time_req/CLOCKS_PER_SEC << " seconds" << endl;
+  cout << " " << endl;
+
+  // Creating goal and start position
+  int n = dimension;
+
+  Noeud start(dimension/4, dimension/7, 0, 0, 0);
+  Noeud goal(dimension/7,9*dimension/10, 0, 0, 0);
+
+  start.id = 0;
+  start.pid = 0;
+  goal.id = goal.x * n + goal.y;
+  start.h = abs(start.x - goal.x) + abs(start.y - goal.y);
 
   time_req = clock();
   
   JPS jps(map_bit_normal, map_bit_transpose, start, goal, n);
-  //(jps.jump_improved(start, 4, 0, 0)).print_Noeud();
   std::vector<Noeud> result = jps.Jump_Search();
+  cout << "Number of jump point before filtering : " << result.size() << endl;
 
+  // Filter the resulting path
+  std::vector<Noeud> final_path;
+  final_path.push_back(result[0]);
+  int x1;
+  int y1;
+  int x2;
+  int y2;
+  int dx;
+  int dy;
+  bool res;
+  int indice_current = 0;
+  for(int i=1; i<result.size(); i++){
+    x1 = result[indice_current].x;
+    y1 = result[indice_current].y;
+    x2 = result[i].x;
+    y2 = result[i].y;
+    dx = abs(x2 - x1);
+    dy = abs(y2 - y1);
+    //If slope is less than one
+    if (dx > dy)
+    {
+        res = jps.Bresenham(x1, y1, x2, y2, dx, dy, 0);
+    }
+    //if slope is greater than or equal to 1
+    else
+    {
+        res = jps.Bresenham(y1, x1, y2, x2, dy, dx, 1);
+    }
+    if(res == true){
+      // there is an obstacle --> push the previous Node into the final path
+      final_path.push_back(result[i-1]);
+      indice_current = i-1;
+      i = i-1;
+    }
+    if(i==result.size()-1){
+      final_path.push_back(result[i]);
+    }
+  }
+  cout << "Number of jump point after filtering : " << final_path.size() << endl;
+  cout << " " << endl;
+  cout << "Orders to give to the robot : " << endl;
+  cout << " " << endl;
+  for(int i=final_path.size()-1; i>0; i--){
+    cout << "Angle : " << round(atan2((final_path[i-1].x - final_path[i].x),(final_path[i-1].y - final_path[i].y))*180/M_PI) << " [°]";
+    cout << " Distance : " << sqrt(pow(final_path[i-1].x - final_path[i].x, 2) + pow(final_path[i-1].y - final_path[i].y, 2))/(resolution*100) << " [m]" <<  endl;;
+  }
+  cout << " " << endl;
   time_req = clock() - time_req;
 	cout << "JPS : " << (float)time_req/CLOCKS_PER_SEC << " seconds" << endl;
-  for(int k=0; k<result.size(); k++){
-    map[result[k].x][result[k].y] = 3;
+
+  // Printing
+  for(int k=0; k<final_path.size(); k++){
+    map[final_path[k].x][final_path[k].y] = 3;
   }
   Print_Map(map, dimension,"../JPS.txt");
 
-
-
-
-
-
-
-  // time_req = clock();
-  // std::cout << "--------------------------------------------------------" << '\n'
-  //           << "--------------------- ALGORITHM: A* ---------------------" << '\n'
-  //           << "--------------------------------------------------------" << '\n';
-  // AStar a_star(map);
-  // {
-  //   map = main_grid;
-  //   const auto [path_found, path_vector] = a_star.Plan(start, goal);
-  //   PrintPath(path_vector, start, goal, map);
-  //   Print_Map(map, dimension, "../a_star.txt");
-  // }
-  // time_req = clock() - time_req;
-	// cout << "A_star " << (float)time_req/CLOCKS_PER_SEC << " seconds" << endl;
-
-  // time_req = clock();
-  // std::cout << "-----------------------------------------------------------------------" << '\n';
-  // std::cout << "--------------------- ALGORITHM: Jump Point Search ---------------------" << '\n';
-  // std::cout << "-----------------------------------------------------------------------" << '\n';
-  // JumpPointSearch jump_point_search(map);
-  // {
-  //   map = main_grid;
-  //   const auto [path_found, path_vector] = jump_point_search.Plan(start, goal);
-  //   PrintPath(path_vector, start, goal, map);
-  //   Print_Map(map, dimension, "../jump_point_search.txt");
-  // }
-  // time_req = clock() - time_req;
-	// cout << "JPS " << (float)time_req/CLOCKS_PER_SEC << " seconds" << endl;
-
-  // time_req = clock();
-  // std::cout << "--------------------------------------------------------------------------" << '\n'
-  //           << "--------------------- ALGORITHM: Lifelong Planning A* ---------------------" << '\n'
-  //           << "--------------------------------------------------------------------------" << '\n';
-  // LPAStar lpa_star(map);
-  // {
-  //   map = main_grid;
-  //   const auto [path_found, path_vector] = lpa_star.Plan(start, goal);
-  //   PrintPath(path_vector, start, goal, map);
-  //   Print_Map(map, dimension, "../lpa_star.txt");
-  // }
-  // time_req = clock() - time_req;
-	// cout << "LPA " << (float)time_req/CLOCKS_PER_SEC << " seconds" << endl;
-
-  // time_req = clock();
-  // std::cout << "-------------------------------------------------------------" << '\n'
-  //           << "--------------------- ALGORITHM: D* Lite ---------------------" << '\n'
-  //           << "-------------------------------------------------------------" << '\n';
-  // DStarLite d_star_lite(map);
-  // {
-  //   map = main_grid;
-  //   const auto [path_found, path_vector] = d_star_lite.Plan(start, goal);
-  //   PrintPath(path_vector, start, goal, map);
-  //   Print_Map(map, dimension, "../d_star_lite.txt");
-  // }
-  // time_req = clock() - time_req;
-	// cout << "D_star " << (float)time_req/CLOCKS_PER_SEC << " seconds" << endl;
-
-  //Visualisation
-  // pcl::visualization::PCLVisualizer::Ptr viewer;
-  // viewer = simpleVis(filtred_cloud_ptr);
-
-  //--------------------
-  // -----Main loop-----
-  //--------------------
-  // while (!viewer->wasStopped ())
-  // {
-  //   viewer->spinOnce (100);
-  //   std::this_thread::sleep_for(100ms);
-  // }
-
-    return 0;
+  return 0;
 }
